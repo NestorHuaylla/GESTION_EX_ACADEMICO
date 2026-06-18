@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BST Sistema Académico · UNA-PUNO</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <div id="app">
+
+    <header id="header">
+      <div id="logo">BST <em>·</em> Sistema Académico <span
+          style="color:var(--text-dim);font-weight:400">U</span></div>
+      <nav id="tabs">
+        <button class="tab-btn active" data-tab="viz">Visualizador BST</button>
+        <button class="tab-btn" data-tab="race">Carrera Comparativa</button>
+        <button class="tab-btn" data-tab="code">Código Fuente</button>
+      </nav>
+    </header>
+
+    <div id="content">
+
+      <!-- VIZ TAB -->
+      <section class="tab-pane active" id="pane-viz">
+        <div id="tree-area"><svg id="tree-svg"></svg></div>
+        <div id="ctrl">
+          <div class="sec">
+            <div class="lbl">Código de estudiante</div>
+            <input class="inp" id="icode" type="number" placeholder="ej. 20210500">
+            <div class="bg3">
+              <button class="btn pri" onclick="opIns()">Insertar</button>
+              <button class="btn" onclick="opSrch()">Buscar</button>
+              <button class="btn dan" onclick="opDel()">Eliminar</button>
+            </div>
+          </div>
+          <div class="div"></div>
+          <div class="sec">
+            <div class="lbl">Recorridos</div>
+            <div class="bg2">
+              <button class="btn" onclick="opTrav('io')">In-Order</button>
+              <button class="btn" onclick="opTrav('pre')">Pre-Order</button>
+              <button class="btn" onclick="opTrav('post')">Post-Order</button>
+              <button class="btn" onclick="opTrav('bfs')">BFS · Niveles</button>
+            </div>
+          </div>
+          <div class="div"></div>
+          <div class="sec">
+            <div class="lbl">Velocidad de animación</div>
+            <div class="sp-row">
+              <span style="font-size:9px;color:var(--text-dim)">Lento</span>
+              <input type="range" id="spd" min="1" max="10" value="5" oninput="updSpd()">
+              <span style="font-size:9px;color:var(--text-dim)">Rápido</span>
+              <span class="sp-val" id="spdlbl">500ms</span>
+            </div>
+          </div>
+          <div class="div"></div>
+          <div class="sec">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div class="lbl">Secuencia visitada</div>
+              <button class="btn" style="padding:2px 8px;font-size:9.5px" onclick="clrLog()">Limpiar</button>
+            </div>
+            <div id="tlog"></div>
+          </div>
+          <div class="div"></div>
+          <div class="sec">
+            <div class="lbl">Estadísticas del árbol</div>
+            <div class="sg">
+              <div class="sc">
+                <div class="sv-val" id="sn">7</div>
+                <div class="sv-name">Nodos</div>
+              </div>
+              <div class="sc">
+                <div class="sv-val" id="sh">2</div>
+                <div class="sv-name">Altura</div>
+              </div>
+              <div class="sc">
+                <div class="sv-val" id="sc2">—</div>
+                <div class="sv-name">Comparaciones</div>
+              </div>
+              <div class="sc">
+                <div class="sv-val" id="sr">—</div>
+                <div class="sv-name">Resultado</div>
+              </div>
+            </div>
+          </div>
+          <button class="btn full" style="margin-top:4px" onclick="resetTree()">↺ Restablecer árbol inicial</button>
+        </div>
+      </section>
+
+      <!-- RACE TAB -->
+      <section class="tab-pane" id="pane-race">
+        <div>
+          <div class="rtitle">Carrera Comparativa</div>
+          <div class="rsub">C++20 · BST &nbsp;vs&nbsp; Python 3.11 · BST — rendimiento de inserción y búsqueda</div>
+        </div>
+        <div class="sec">
+          <div class="lbl">Tamaño de datos N</div>
+          <div class="nsel">
+            <button class="nbtn" data-n="100">100</button>
+            <button class="nbtn active" data-n="1000">1,000</button>
+            <button class="nbtn" data-n="10000">10,000</button>
+            <button class="nbtn" data-n="50000">50,000</button>
+          </div>
+        </div>
+        <div class="srow">
+          <button id="brn" onclick="runRace()">Iniciar carrera</button>
+          <div id="rst">Selecciona N y presiona iniciar</div>
+        </div>
+        <div class="rpanels">
+          <div class="rpanel cpp">
+            <div class="rlang">C++20</div>
+            <div class="rtime" id="ct">—</div>
+            <div class="rtlbl">inserción total (ms)</div>
+            <div class="rbw">
+              <div class="rb" id="cb"></div>
+            </div>
+            <div class="rstats">
+              <div class="rsr"><span>Inserción</span><span class="rsv" id="ci">—</span></div>
+              <div class="rsr"><span>Búsqueda</span><span class="rsv" id="cs">—</span></div>
+              <div class="rsr"><span>Altura BST</span><span class="rsv" id="ca">—</span></div>
+            </div>
+          </div>
+          <div class="rpanel py">
+            <div class="rlang">Python 3.11</div>
+            <div class="rtime" id="pt">—</div>
+            <div class="rtlbl">inserción total (ms)</div>
+            <div class="rbw">
+              <div class="rb" id="pb"></div>
+            </div>
+            <div class="rstats">
+              <div class="rsr"><span>Inserción</span><span class="rsv" id="pi">—</span></div>
+              <div class="rsr"><span>Búsqueda</span><span class="rsv" id="ps">—</span></div>
+              <div class="rsr"><span>Altura BST</span><span class="rsv" id="pa">—</span></div>
+            </div>
+          </div>
+          <div class="rpanel jv">
+            <div class="rlang">JavaScript ES2022</div>
+            <div class="rtime" id="jt">—</div>
+            <div class="rtlbl">inserción total (ms) · medido en vivo</div>
+            <div class="rbw">
+              <div class="rb" id="jb"></div>
+            </div>
+            <div class="rstats">
+              <div class="rsr"><span>Inserción</span><span class="rsv" id="ji">—</span></div>
+              <div class="rsr"><span>Búsqueda</span><span class="rsv" id="jsr">—</span></div>
+              <div class="rsr"><span>Altura BST</span><span class="rsv" id="ja">—</span></div>
+            </div>
+          </div>
+        </div>
+        <div id="wb"></div>
+        <div class="sec">
+          <div class="lbl">Escalabilidad · Inserción (ms) vs N</div>
+          <svg id="chart-svg" viewBox="0 0 760 190"></svg>
+        </div>
+      </section>
+
+      <!-- CODE TAB -->
+      <section class="tab-pane" id="pane-code">
+        <div id="ctabs">
+          <button class="ctab active" data-lang="cpp">version.cpp &nbsp;·&nbsp; C++20</button>
+          <button class="ctab" data-lang="py">version.py &nbsp;·&nbsp; Python 3.11</button>
+          <button class="ctab" data-lang="jv">simulador.js &nbsp;·&nbsp; JavaScript ES2022</button>
+        </div>
+        <div id="cdisplay">
+          <pre id="ccontent"></pre>
+        </div>
+      </section>
+
+    </div>
+
+    <div id="statusbar">
+      <div id="si"></div>
+      <span id="stxt">Listo · 7 nodos cargados desde crearDatosPrueba()</span>
+    </div>
+  </div>
+
+  <div id="tt"></div>
+
+  <script src="simulador.js"></script>
+</body>
+
+</html>

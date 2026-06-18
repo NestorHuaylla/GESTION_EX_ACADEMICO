@@ -1,0 +1,313 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[spanish,es-tabla]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\usepackage{setspace}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{caption}
+\usepackage{float}
+\usepackage{indentfirst}
+
+\geometry{margin=2.54cm}
+\onehalfspacing
+\setlength{\parindent}{1.27cm}
+\setlength{\parskip}{0pt}
+\renewcommand{\arraystretch}{1.15}
+\setlist[itemize]{leftmargin=1.25cm}
+\hypersetup{colorlinks=true,linkcolor=black,urlcolor=blue}
+
+\titleformat{\section}{\normalfont\bfseries\centering}{\thesection}{0.5em}{}
+\titleformat{\subsection}{\normalfont\bfseries}{\thesubsection}{0.5em}{}
+\titleformat{\subsubsection}{\normalfont\bfseries}{\thesubsubsection}{0.5em}{}
+
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{Informe de investigación}
+\lhead{Aplicación móvil}
+\cfoot{\thepage}
+
+\begin{document}
+
+% PORTADA APA 7
+\begin{titlepage}
+\centering
+\vspace*{1.5cm}
+
+{\Large \textbf{Informe de Investigación de Aplicación Móvil}\par}
+\vspace{0.5cm}
+{\large \textbf{BST Académico Móvil}\par}
+
+\vfill
+
+\begin{flushleft}
+{\large \textbf{Autor:} Nestor Fernando Huaylla Benito\par}
+\vspace{0.4cm}
+{\large \textbf{Afiliación:} Universidad Nacional del Altiplano de Puno\par}
+\vspace{0.4cm}
+{\large \textbf{Programa o carrera:} Ingeniería de Sistemas\par}
+\vspace{0.4cm}
+{\large \textbf{Curso:} Estructura de Datos\par}
+\vspace{0.4cm}
+{\large \textbf{Docente:} [Completar]\par}
+\vspace{0.4cm}
+{\large \textbf{Fecha de entrega:} 18 de junio de 2026\par}
+\end{flushleft}
+
+\vspace*{0.5cm}
+\end{titlepage}
+
+\tableofcontents
+\newpage
+
+\section{Datos generales}
+
+\subsection{Título del proyecto}
+\begin{itemize}
+    \item Aplicación móvil para la gestión y visualización de expedientes académicos mediante Árbol Binario de Búsqueda.
+\end{itemize}
+
+\subsection{Síntesis de documentos revisados}
+
+Se revisaron los archivos disponibles en la carpeta del proyecto. La esencia común de los documentos es el diseño de un sistema académico que organiza expedientes estudiantiles por código mediante un Árbol Binario de Búsqueda (BST), permitiendo insertar, buscar, eliminar, recorrer, filtrar y analizar registros académicos.
+
+\begin{table}[H]
+\centering
+\small
+\caption{Esencia de los documentos revisados en la carpeta del proyecto}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{3.4cm} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X}
+\toprule
+\textbf{Documento} & \textbf{Esencia} & \textbf{Aporte al informe} \\
+\midrule
+\texttt{index.html} & Define la interfaz del sistema web: visualizador BST, carrera comparativa y visor de código fuente. & Permite identificar las pantallas principales que puede heredar la aplicación móvil. \\
+\texttt{style.css} & Establece el diseño visual: panel oscuro, botones, tarjetas de estadísticas, pestañas y visualización SVG del árbol. & Sirve como referencia estética para un diseño móvil sobrio, técnico y académico. \\
+\texttt{simulador.js} & Implementa el BST interactivo en JavaScript, los datos de estudiantes, animaciones, recorridos, búsqueda, inserción, eliminación y comparación de rendimiento. & Muestra la funcionalidad central que debe trasladarse a la aplicación móvil. \\
+\texttt{version.py} & Implementa el modelo académico en Python con validación de código, PPA, estados, recorridos, filtros, estadísticas y eliminación. & Confirma la lógica del dominio y los resultados de prueba del sistema. \\
+\texttt{version.cpp} & Implementa la misma lógica en C++ con tipos fuertes, punteros inteligentes, recorridos, filtros, estadísticas y búsqueda por rango. & Sustenta la eficiencia y la comparación técnica entre lenguajes. \\
+\texttt{codigo\_bst\_python.txt} & Versión documentada del código Python, con comentarios sobre estado académico, expediente, nodo y clase principal del árbol. & Ayuda a explicar la arquitectura interna de forma más entendible. \\
+\texttt{codigo\_bst\_cpp (1).txt} & Versión documentada del código C++, con énfasis en validación de expedientes, nodos y operaciones del BST. & Refuerza la equivalencia funcional entre la versión académica en C++ y Python. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Idea de la aplicación}
+
+\subsection{Nombre de la aplicación}
+
+BST Académico Móvil.
+
+\subsection{Problema que resuelve}
+
+En una institución académica, la consulta de expedientes de estudiantes puede volverse lenta si los registros se revisan manualmente o si no existe una estructura clara para localizar datos por código. El proyecto propone una aplicación móvil que permita registrar, buscar y consultar expedientes académicos usando un Árbol Binario de Búsqueda, estructura que ordena los registros por código de estudiante y facilita búsquedas, recorridos y filtros.
+
+La propuesta parte de los documentos revisados, donde los expedientes contienen código, nombre, escuela profesional, PPA, créditos, estado académico y semestre de ingreso. En la prueba ejecutada con la versión Python se trabajó con 7 estudiantes, altura de árbol 2, PPA promedio de 15.37, 5 estudiantes activos y operaciones correctas de búsqueda, filtrado y eliminación.
+
+\subsection{Usuarios objetivo}
+
+\begin{itemize}
+    \item Personal de secretaría académica que necesita ubicar expedientes por código de estudiante.
+    \item Docentes o tutores que requieren revisar estado académico, PPA, créditos y escuela profesional.
+    \item Coordinadores de programa que necesitan filtrar estudiantes por estado, escuela o rendimiento.
+    \item Estudiantes que podrían consultar su información académica básica desde el móvil, si se incorpora autenticación.
+\end{itemize}
+
+\subsection{Funcionalidades principales}
+
+\begin{itemize}
+    \item Registro de expedientes académicos con validación de código, PPA, créditos, estado y semestre.
+    \item Búsqueda de estudiante por código usando la lógica del BST.
+    \item Inserción y eliminación de registros manteniendo el orden del árbol.
+    \item Recorridos In-Order, Pre-Order, Post-Order y BFS por niveles.
+    \item Filtros por escuela profesional, estado académico, rango de PPA y rango de códigos.
+    \item Visualización gráfica del árbol para comprender la ubicación de cada expediente.
+    \item Panel de estadísticas: total de nodos, altura del árbol, PPA mínimo, PPA máximo, PPA promedio y estudiantes activos.
+    \item Comparación de rendimiento entre implementaciones o módulos internos para evaluar la viabilidad técnica.
+\end{itemize}
+
+\section{Investigación de fuentes secundarias}
+
+\subsection{Aplicaciones similares}
+
+Se investigaron aplicaciones educativas y académicas relacionadas con gestión de información estudiantil, consulta móvil, calificaciones, actividades, cursos y comunicación institucional.
+
+\begin{table}[H]
+\centering
+\small
+\caption{Análisis de aplicaciones similares}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{3cm} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X}
+\toprule
+\textbf{Aplicación} & \textbf{Funcionalidades} & \textbf{Ventajas} & \textbf{Desventajas} \\
+\midrule
+PowerSchool Mobile & Consulta de información académica, calificaciones, asistencia, horarios, tareas y comunicación entre institución, estudiantes y familias. & Está orientada a seguimiento académico móvil y notificaciones institucionales. & Depende de una institución registrada y es una solución cerrada; no muestra la estructura algorítmica usada para gestionar datos. \\
+Campus Student de Infinite Campus & Consulta de calificaciones, asistencia, horarios, actividades y datos escolares desde una aplicación para estudiantes. & Tiene enfoque directo en el estudiante y centraliza información académica esencial. & Requiere adopción institucional; su alcance depende de la configuración del centro educativo. \\
+Moodle App & Acceso móvil a cursos, actividades, mensajes, calendario, libro de calificaciones, notificaciones y contenido sin conexión. & Es flexible, ampliamente usado y tiene soporte móvil para aprendizaje en línea. & Está centrado en cursos y actividades de aprendizaje, no en la visualización de expedientes mediante estructuras de datos. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\textit{Evidencia: insertar capturas de pantalla de PowerSchool Mobile, Campus Student y Moodle App. En esta versión LaTeX se deja el espacio de evidencia para que las capturas puedan agregarse al compilar el informe final.}
+
+\begin{figure}[H]
+\centering
+\fbox{\begin{minipage}{0.9\textwidth}
+\centering
+Espacio para capturas de aplicaciones similares: PowerSchool Mobile, Campus Student y Moodle App.
+\end{minipage}}
+\caption{Evidencia de aplicaciones similares investigadas}
+\end{figure}
+
+\subsection{Recursos de aprendizaje relacionados}
+
+Los recursos seleccionados ayudan a convertir el prototipo actual en una aplicación móvil real, principalmente mediante Flutter, Firebase y buenas prácticas de interfaz móvil.
+
+\subsubsection{Video tutoriales}
+
+\begin{table}[H]
+\centering
+\small
+\caption{Video tutoriales analizados}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{3cm} >{\raggedright\arraybackslash}p{2.7cm} >{\raggedright\arraybackslash}p{4cm} >{\raggedright\arraybackslash}X}
+\toprule
+\textbf{Título} & \textbf{Plataforma} & \textbf{URL} & \textbf{Tema aprendido} \\
+\midrule
+Get to know Firebase for Flutter & YouTube / Firebase & \url{https://www.youtube.com/watch?v=wUSkeTaBonA} & Configuración de Firebase en Flutter para preparar autenticación, base de datos y servicios de backend. \\
+Introducing Flutter in Focus & YouTube / Flutter & \url{https://www.youtube.com/watch?v=wgTBLj7rMPM} & Buenas prácticas para construir interfaces en Flutter, separar componentes y desarrollar pantallas móviles entendibles. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\textit{Evidencia: insertar capturas de pantalla de los dos videos revisados, mostrando título, plataforma y contenido principal.}
+
+\subsubsection{Manuales o PDFs}
+
+\begin{table}[H]
+\centering
+\small
+\caption{Documentos y manuales revisados}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{4cm} >{\raggedright\arraybackslash}p{4cm} >{\raggedright\arraybackslash}X}
+\toprule
+\textbf{Documento} & \textbf{URL} & \textbf{Aporte al proyecto} \\
+\midrule
+Flutter architectural overview & \url{https://docs.flutter.dev/resources/architectural-overview} & Explica la arquitectura de Flutter, el uso de widgets, capas de renderizado y reutilización de código para Android, iOS, web y escritorio. \\
+Get started with Firebase in your Flutter project & \url{https://firebase.google.com/docs/flutter/setup} & Indica cómo conectar una aplicación Flutter con Firebase, instalar herramientas, configurar plataformas e inicializar servicios. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsubsection{Sitios web o sistemas SaaS}
+
+\begin{table}[H]
+\centering
+\small
+\caption{Sistemas SaaS y plataformas analizadas}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{4cm} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}p{4cm}}
+\toprule
+\textbf{Sistema o SaaS} & \textbf{Funcionalidades observadas} & \textbf{URL} \\
+\midrule
+openSIS & Sistema de información estudiantil en la nube para gestionar datos de estudiantes, asistencia, calificaciones, horarios, comunicación, reportes, admisiones y progreso académico. & \url{https://www.opensis.com/} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\textit{Evidencia: insertar capturas de pantalla de los videos, manuales y sistema SaaS analizados.}
+
+\begin{figure}[H]
+\centering
+\fbox{\begin{minipage}{0.9\textwidth}
+\centering
+Espacio para capturas de recursos: videos de Flutter/Firebase, manuales oficiales y plataforma openSIS.
+\end{minipage}}
+\caption{Evidencia de recursos de aprendizaje y SaaS}
+\end{figure}
+
+\section{Diseño preliminar}
+
+El diseño preliminar propone una aplicación móvil orientada a consulta rápida y gestión académica. La pantalla inicial debe priorizar la búsqueda por código, porque esa es la clave usada por el BST en los documentos revisados.
+
+\begin{table}[H]
+\centering
+\small
+\caption{Boceto funcional de pantallas principales}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{3.5cm} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X}
+\toprule
+\textbf{Pantalla} & \textbf{Contenido principal} & \textbf{Acciones esperadas} \\
+\midrule
+Inicio / acceso & Logo de la aplicación, ingreso de usuario y acceso institucional. & Iniciar sesión o entrar como modo demostración. \\
+Dashboard académico & Total de expedientes, altura del árbol, PPA promedio, activos y alertas. & Revisar resumen general y entrar a búsqueda. \\
+Búsqueda por código & Campo de código de estudiante, resultado rápido y número de comparaciones. & Buscar expediente, limpiar búsqueda y ver detalle. \\
+Detalle de expediente & Código, nombre, escuela, PPA, créditos, estado y semestre. & Editar, eliminar o volver al árbol. \\
+Visualizador BST & Representación del árbol por niveles y recorridos In-Order, Pre-Order, Post-Order y BFS. & Ejecutar recorridos, insertar nodo, eliminar nodo y restablecer datos de prueba. \\
+Filtros y reportes & Filtros por escuela, estado, PPA y rango de código. & Generar listas ordenadas y revisar resultados. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\fbox{\begin{minipage}{0.9\textwidth}
+\centering
+\textbf{Wireframe textual}\\[0.3cm]
+\begin{tabular}{ccc}
+\fbox{\begin{minipage}{0.25\textwidth}\centering Inicio\\Login\\Acceso\end{minipage}} &
+\fbox{\begin{minipage}{0.25\textwidth}\centering Dashboard\\Estadísticas\\Búsqueda\end{minipage}} &
+\fbox{\begin{minipage}{0.25\textwidth}\centering Detalle\\Expediente\\Acciones\end{minipage}} \\[0.5cm]
+\fbox{\begin{minipage}{0.25\textwidth}\centering Árbol BST\\Recorridos\\Nodos\end{minipage}} &
+\fbox{\begin{minipage}{0.25\textwidth}\centering Filtros\\PPA\\Estado\end{minipage}} &
+\fbox{\begin{minipage}{0.25\textwidth}\centering Reportes\\Resultados\\Exportar\end{minipage}}
+\end{tabular}
+\end{minipage}}
+\caption{Boceto preliminar de pantallas móviles}
+\end{figure}
+
+\textit{Evidencia: reemplazar el boceto textual por capturas o imágenes del wireframe si se diseña en Figma, Canva, Excalidraw u otra herramienta.}
+
+\section{Conclusiones}
+
+\begin{itemize}
+    \item La esencia del proyecto es usar un Árbol Binario de Búsqueda para organizar expedientes académicos por código de estudiante y facilitar consultas ordenadas.
+    \item Los documentos revisados muestran una base funcional sólida: la lógica existe en Python, C++ y JavaScript, y el simulador web demuestra visualización, recorridos, filtros y comparación de rendimiento.
+    \item La aplicación móvil es viable porque las funciones principales ya están definidas: búsqueda, inserción, eliminación, recorridos, filtros y estadísticas académicas.
+    \item La principal mejora para una versión móvil real sería agregar autenticación, persistencia en base de datos, sincronización con backend y protección de datos personales.
+    \item Las aplicaciones similares investigadas demuestran que existe necesidad de acceso móvil a información académica, pero la propuesta se diferencia porque incluye visualización del BST y explicación algorítmica del expediente.
+\end{itemize}
+
+\section{Referencias bibliográficas}
+
+Firebase. (2026). \textit{Get started with Firebase in your Flutter project}. \url{https://firebase.google.com/docs/flutter/setup}
+
+Flutter. (2026). \textit{Flutter architectural overview}. \url{https://docs.flutter.dev/resources/architectural-overview}
+
+Flutter. (2026). \textit{Videos}. \url{https://docs.flutter.dev/resources/videos}
+
+Firebase. (s. f.). \textit{Get to know Firebase for Flutter} [Video]. YouTube. \url{https://www.youtube.com/watch?v=wUSkeTaBonA}
+
+Flutter. (s. f.). \textit{Introducing Flutter in Focus} [Video]. YouTube. \url{https://www.youtube.com/watch?v=wgTBLj7rMPM}
+
+Huaylla Benito, N. F. (2026). \textit{BST Sistema Académico UNA-PUNO} [Archivos fuente \texttt{version.py}, \texttt{version.cpp}, \texttt{simulador.js}, \texttt{index.html} y \texttt{style.css}].
+
+Moodle. (2026). \textit{Moodle App}. \url{https://moodle.com/products/moodle-app/}
+
+openSIS. (2026). \textit{Cloud based student information system}. \url{https://www.opensis.com/}
+
+PowerSchool. (2026). \textit{PowerSchool}. \url{https://www.powerschool.com/}
+
+Infinite Campus. (2026). \textit{Campus Student}. \url{https://www.infinitecampus.com/audience/parents-students/campus-student}
+
+\section*{Requisitos mínimos}
+\begin{itemize}
+    \item 3 aplicaciones similares investigadas: PowerSchool Mobile, Campus Student y Moodle App.
+    \item 2 video tutoriales relacionados: Firebase para Flutter y Flutter in Focus.
+    \item 2 documentos o manuales relacionados: Flutter architectural overview y Firebase para Flutter.
+    \item 1 sistema SaaS o plataforma web analizada: openSIS.
+    \item Capturas de pantalla como evidencia de toda la investigación: se dejaron espacios de evidencia para insertar capturas.
+    \item Boceto de las pantallas principales: se incluyó un wireframe textual preliminar.
+\end{itemize}
+
+\end{document}

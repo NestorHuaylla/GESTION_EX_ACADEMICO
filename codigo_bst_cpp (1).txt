@@ -1,0 +1,686 @@
+#include <algorithm>
+#include <chrono>
+#include <iomanip>
+#include <iostream>
+#include <memory>
+#include <optional>
+#include <queue>
+#include <random>
+#include <stdexcept>
+#include <string>
+#include <utility>
+#include <vector>
+
+namespace una_puno {
+
+// ============================================================
+// ESTADO ACADEMICO
+// ============================================================
+
+enum class EstadoAcademico {
+    ACTIVO,
+    EGRESADO,
+    RETIRADO,
+    SUSPENDIDO
+};
+
+inline std::string estadoStr(EstadoAcademico e) {
+    switch (e) {
+        case EstadoAcademico::ACTIVO:
+            return "ACTIVO";
+        case EstadoAcademico::EGRESADO:
+            return "EGRESADO";
+        case EstadoAcademico::RETIRADO:
+            return "RETIRADO";
+        case EstadoAcademico::SUSPENDIDO:
+            return "SUSPENDIDO";
+        default:
+            return "DESCONOCIDO";
+    }
+}
+
+// ============================================================
+// DATOS DEL EXPEDIENTE ACADEMICO
+// ============================================================
+
+struct Estudiante {
+    int codigo;
+    std::string nombre;
+    std::string escuela;
+    float ppa;
+    int creditos;
+    EstadoAcademico estado;
+    std::string semestre_ingreso;
+
+    Estudiante(
+        int cod,
+        std::string nom,
+        std::string esc,
+        float pp,
+        int cred,
+        EstadoAcademico est,
+        std::string sem
+    )
+        : codigo(cod),
+          nombre(std::move(nom)),
+          escuela(std::move(esc)),
+          ppa(pp),
+          creditos(cred),
+          estado(est),
+          semestre_ingreso(std::move(sem))
+    {
+        if (cod < 10000000 || cod > 29999999) {
+            throw std::invalid_argument("Codigo invalido: " + std::to_string(cod));
+        }
+
+        if (pp < 0.0f || pp > 20.0f) {
+            throw std::invalid_argument("PPA fuera de rango [0,20]");
+        }
+    }
+
+    void print() const {
+        std::cout << std::left
+                  << std::setw(12) << codigo
+                  << std::setw(35) << nombre
+                  << std::setw(20) << escuela
+                  << std::setw(8) << std::fixed << std::setprecision(1) << ppa
+                  << std::setw(10) << creditos
+                  << std::setw(12) << estadoStr(estado)
+                  << semestre_ingreso << '\n';
+    }
+};
+
+// ============================================================
+// NODO DEL BST
+// ============================================================
+
+struct NodoBST {
+    Estudiante dato;
+    std::unique_ptr<NodoBST> izquierdo;
+    std::unique_ptr<NodoBST> derecho;
+
+    explicit NodoBST(Estudiante e)
+        : dato(std::move(e)),
+          izquierdo(nullptr),
+          derecho(nullptr)
+    {}
+};
+
+// ============================================================
+// CLASE ARBOL ACADEMICO
+// ============================================================
+
+class ArbolAcademico {
+private:
+    std::unique_ptr<NodoBST> raiz;
+
+public:
+    ArbolAcademico() = default;
+
+    // ------------------------------------------------------------
+    // INSERTAR
+    // ------------------------------------------------------------
+
+    void insertar(Estudiante e) {
+        insertar_(raiz, std::move(e));
+    }
+
+private:
+    void insertar_(std::unique_ptr<NodoBST>& nodo, Estudiante e) {
+        if (!nodo) {
+            nodo = std::make_unique<NodoBST>(std::move(e));
+            return;
+        }
+
+        if (e.codigo < nodo->dato.codigo) {
+            insertar_(nodo->izquierdo, std::move(e));
+        } else if (e.codigo > nodo->dato.codigo) {
+            insertar_(nodo->derecho, std::move(e));
+        } else {
+            throw std::runtime_error("Codigo duplicado: " + std::to_string(e.codigo));
+        }
+    }
+
+public:
+    // ------------------------------------------------------------
+    // BUSCAR
+    // ------------------------------------------------------------
+
+    std::optional<Estudiante> buscar(int codigo) const {
+        const NodoBST* nodo = buscar_(raiz.get(), codigo);
+
+        if (nodo) {
+            return nodo->dato;
+        }
+
+        return std::nullopt;
+    }
+
+private:
+    const NodoBST* buscar_(const NodoBST* nodo, int codigo) const {
+        if (!nodo || nodo->dato.codigo == codigo) {
+            return nodo;
+        }
+
+        if (codigo < nodo->dato.codigo) {
+            return buscar_(nodo->izquierdo.get(), codigo);
+        }
+
+        return buscar_(nodo->derecho.get(), codigo);
+    }
+
+public:
+    // ------------------------------------------------------------
+    // ELIMINAR
+    // ------------------------------------------------------------
+
+    void eliminar(int codigo) {
+        if (!buscar(codigo)) {
+            throw std::runtime_error("Codigo no encontrado: " + std::to_string(codigo));
+        }
+
+        raiz = eliminar_(std::move(raiz), codigo);
+    }
+
+private:
+    std::unique_ptr<NodoBST> eliminar_(std::unique_ptr<NodoBST> nodo, int codigo) {
+        if (!nodo) {
+            return nullptr;
+        }
+
+        if (codigo < nodo->dato.codigo) {
+            nodo->izquierdo = eliminar_(std::move(nodo->izquierdo), codigo);
+        } else if (codigo > nodo->dato.codigo) {
+            nodo->derecho = eliminar_(std::move(nodo->derecho), codigo);
+        } else {
+            // Caso 1 y 2: sin hijo izquierdo o nodo hoja.
+            if (!nodo->izquierdo) {
+                return std::move(nodo->derecho);
+            }
+
+            // Caso 2: sin hijo derecho.
+            if (!nodo->derecho) {
+                return std::move(nodo->izquierdo);
+            }
+
+            // Caso 3: dos hijos.
+            // Se reemplaza por el sucesor in-order:
+            // el minimo del subarbol derecho.
+            NodoBST* sucesor = minimo_(nodo->derecho.get());
+            nodo->dato = sucesor->dato;
+            nodo->derecho = eliminar_(std::move(nodo->derecho), sucesor->dato.codigo);
+        }
+
+        return nodo;
+    }
+
+    NodoBST* minimo_(NodoBST* nodo) const {
+        while (nodo->izquierdo) {
+            nodo = nodo->izquierdo.get();
+        }
+
+        return nodo;
+    }
+
+public:
+    std::optional<Estudiante> maximo() const {
+        if (!raiz) {
+            return std::nullopt;
+        }
+
+        const NodoBST* nodo = raiz.get();
+
+        while (nodo->derecho) {
+            nodo = nodo->derecho.get();
+        }
+
+        return nodo->dato;
+    }
+
+    // ------------------------------------------------------------
+    // RECORRIDOS
+    // ------------------------------------------------------------
+
+    std::vector<Estudiante> inOrder() const {
+        std::vector<Estudiante> resultado;
+        inOrder_(raiz.get(), resultado);
+        return resultado;
+    }
+
+private:
+    void inOrder_(const NodoBST* nodo, std::vector<Estudiante>& resultado) const {
+        if (!nodo) {
+            return;
+        }
+
+        inOrder_(nodo->izquierdo.get(), resultado);
+        resultado.push_back(nodo->dato);
+        inOrder_(nodo->derecho.get(), resultado);
+    }
+
+public:
+    std::vector<Estudiante> preOrder() const {
+        std::vector<Estudiante> resultado;
+        preOrder_(raiz.get(), resultado);
+        return resultado;
+    }
+
+private:
+    void preOrder_(const NodoBST* nodo, std::vector<Estudiante>& resultado) const {
+        if (!nodo) {
+            return;
+        }
+
+        resultado.push_back(nodo->dato);
+        preOrder_(nodo->izquierdo.get(), resultado);
+        preOrder_(nodo->derecho.get(), resultado);
+    }
+
+public:
+    std::vector<Estudiante> postOrder() const {
+        std::vector<Estudiante> resultado;
+        postOrder_(raiz.get(), resultado);
+        return resultado;
+    }
+
+private:
+    void postOrder_(const NodoBST* nodo, std::vector<Estudiante>& resultado) const {
+        if (!nodo) {
+            return;
+        }
+
+        postOrder_(nodo->izquierdo.get(), resultado);
+        postOrder_(nodo->derecho.get(), resultado);
+        resultado.push_back(nodo->dato);
+    }
+
+public:
+    std::vector<Estudiante> bfs() const {
+        std::vector<Estudiante> resultado;
+
+        if (!raiz) {
+            return resultado;
+        }
+
+        std::queue<const NodoBST*> cola;
+        cola.push(raiz.get());
+
+        while (!cola.empty()) {
+            const NodoBST* actual = cola.front();
+            cola.pop();
+
+            resultado.push_back(actual->dato);
+
+            if (actual->izquierdo) {
+                cola.push(actual->izquierdo.get());
+            }
+
+            if (actual->derecho) {
+                cola.push(actual->derecho.get());
+            }
+        }
+
+        return resultado;
+    }
+
+    // ------------------------------------------------------------
+    // ALTURA Y ESTADISTICAS
+    // ------------------------------------------------------------
+
+    int altura() const {
+        return altura_(raiz.get());
+    }
+
+private:
+    int altura_(const NodoBST* nodo) const {
+        if (!nodo) {
+            return -1;
+        }
+
+        return 1 + std::max(
+            altura_(nodo->izquierdo.get()),
+            altura_(nodo->derecho.get())
+        );
+    }
+
+public:
+    void estadisticas() const {
+        auto todos = inOrder();
+
+        if (todos.empty()) {
+            std::cout << "Arbol vacio\n";
+            return;
+        }
+
+        float suma = 0.0f;
+        float mn = 20.0f;
+        float mx = 0.0f;
+        int activos = 0;
+
+        for (const auto& e : todos) {
+            suma += e.ppa;
+
+            if (e.ppa < mn) {
+                mn = e.ppa;
+            }
+
+            if (e.ppa > mx) {
+                mx = e.ppa;
+            }
+
+            if (e.estado == EstadoAcademico::ACTIVO) {
+                activos++;
+            }
+        }
+
+        std::cout << std::fixed << std::setprecision(2)
+                  << "Total nodos  : " << todos.size() << '\n'
+                  << "Altura       : " << altura() << '\n'
+                  << "PPA promedio : " << suma / todos.size() << '\n'
+                  << "PPA minimo   : " << mn << '\n'
+                  << "PPA maximo   : " << mx << '\n'
+                  << "Activos      : " << activos << '\n';
+    }
+
+    // ------------------------------------------------------------
+    // CONSULTAS
+    // ------------------------------------------------------------
+
+    std::vector<Estudiante> porRangoPPA(float ppaMin, float ppaMax = 20.0f) const {
+        auto todos = inOrder();
+        std::vector<Estudiante> resultado;
+
+        std::copy_if(
+            todos.begin(),
+            todos.end(),
+            std::back_inserter(resultado),
+            [ppaMin, ppaMax](const Estudiante& e) {
+                return e.ppa >= ppaMin && e.ppa <= ppaMax;
+            }
+        );
+
+        return resultado;
+    }
+
+    std::vector<Estudiante> porEscuela(const std::string& escuela) const {
+        auto todos = inOrder();
+        std::vector<Estudiante> resultado;
+
+        std::copy_if(
+            todos.begin(),
+            todos.end(),
+            std::back_inserter(resultado),
+            [&escuela](const Estudiante& e) {
+                return e.escuela == escuela;
+            }
+        );
+
+        return resultado;
+    }
+
+    std::vector<Estudiante> porEstado(EstadoAcademico estado) const {
+        auto todos = inOrder();
+        std::vector<Estudiante> resultado;
+
+        std::copy_if(
+            todos.begin(),
+            todos.end(),
+            std::back_inserter(resultado),
+            [estado](const Estudiante& e) {
+                return e.estado == estado;
+            }
+        );
+
+        return resultado;
+    }
+
+    std::vector<Estudiante> buscarRangoCodigo(int codMin, int codMax) const {
+        std::vector<Estudiante> resultado;
+        buscarRangoCodigo_(raiz.get(), codMin, codMax, resultado);
+        return resultado;
+    }
+
+private:
+    void buscarRangoCodigo_(
+        const NodoBST* nodo,
+        int codMin,
+        int codMax,
+        std::vector<Estudiante>& resultado
+    ) const {
+        if (!nodo) {
+            return;
+        }
+
+        if (nodo->dato.codigo > codMin) {
+            buscarRangoCodigo_(nodo->izquierdo.get(), codMin, codMax, resultado);
+        }
+
+        if (nodo->dato.codigo >= codMin && nodo->dato.codigo <= codMax) {
+            resultado.push_back(nodo->dato);
+        }
+
+        if (nodo->dato.codigo < codMax) {
+            buscarRangoCodigo_(nodo->derecho.get(), codMin, codMax, resultado);
+        }
+    }
+
+public:
+    // ------------------------------------------------------------
+    // VISUALIZACION ASCII
+    // ------------------------------------------------------------
+
+    void imprimirArbol() const {
+        std::cout << "\n-- Estructura del BST --\n";
+        imprimir_(raiz.get(), "", false);
+    }
+
+private:
+    void imprimir_(const NodoBST* nodo, const std::string& prefix, bool isLeft) const {
+        if (!nodo) {
+            return;
+        }
+
+        std::string conector = isLeft ? "+-- " : "`-- ";
+
+        std::cout << prefix << conector
+                  << nodo->dato.codigo << " [PPA:"
+                  << std::fixed << std::setprecision(1)
+                  << nodo->dato.ppa << "]\n";
+
+        std::string extension = isLeft ? "|   " : "    ";
+
+        imprimir_(nodo->izquierdo.get(), prefix + extension, true);
+        imprimir_(nodo->derecho.get(), prefix + extension, false);
+    }
+};
+
+} // namespace una_puno
+
+// ============================================================
+// FUNCIONES DE APOYO
+// ============================================================
+
+void imprimirTabla(
+    const std::vector<una_puno::Estudiante>& estudiantes,
+    const std::string& titulo
+) {
+    std::cout << "\n-- " << titulo << " --\n";
+    std::cout << std::left
+              << std::setw(12) << "CODIGO"
+              << std::setw(35) << "NOMBRE"
+              << std::setw(20) << "ESCUELA"
+              << std::setw(8) << "PPA"
+              << std::setw(10) << "CREDITOS"
+              << std::setw(12) << "ESTADO"
+              << "SEMESTRE" << '\n';
+
+    std::cout << std::string(110, '-') << '\n';
+
+    for (const auto& e : estudiantes) {
+        e.print();
+    }
+}
+
+std::vector<una_puno::Estudiante> crearDatosPrueba() {
+    using namespace una_puno;
+
+    return {
+        {20210500, "Mamani Quispe, Juan", "Ing. Sistemas", 15.8f, 120, EstadoAcademico::ACTIVO, "2021-I"},
+        {20210300, "Huanca Apaza, Maria", "Ing. Civil", 14.2f, 110, EstadoAcademico::ACTIVO, "2021-I"},
+        {20210700, "Condori Flores, Pedro", "Medicina", 17.1f, 130, EstadoAcademico::ACTIVO, "2021-I"},
+        {20210100, "Ticona Lupaca, Rosa", "Contabilidad", 12.0f, 90, EstadoAcademico::SUSPENDIDO, "2021-I"},
+        {20210400, "Larico Ccama, Carlos", "Ing. Sistemas", 16.5f, 115, EstadoAcademico::ACTIVO, "2021-I"},
+        {20210600, "Cutipa Vargas, Elena", "Agronomia", 13.7f, 100, EstadoAcademico::ACTIVO, "2021-I"},
+        {20210900, "Pari Choque, Luis", "Ing. Sistemas", 18.3f, 140, EstadoAcademico::EGRESADO, "2021-I"}
+    };
+}
+
+// ============================================================
+// BENCHMARK EXPERIMENTAL
+// ============================================================
+
+std::vector<una_puno::Estudiante> generarDatos(int n) {
+    using namespace una_puno;
+
+    std::mt19937 rng(42);
+    std::uniform_int_distribution<int> distCod(20000000, 29999999);
+    std::uniform_real_distribution<float> distPPA(8.0f, 20.0f);
+
+    std::vector<int> codigos;
+
+    while (static_cast<int>(codigos.size()) < n) {
+        codigos.push_back(distCod(rng));
+    }
+
+    std::sort(codigos.begin(), codigos.end());
+    codigos.erase(std::unique(codigos.begin(), codigos.end()), codigos.end());
+
+    while (static_cast<int>(codigos.size()) < n) {
+        int c = distCod(rng);
+
+        if (!std::binary_search(codigos.begin(), codigos.end(), c)) {
+            codigos.push_back(c);
+            std::sort(codigos.begin(), codigos.end());
+        }
+    }
+
+    codigos.resize(n);
+    std::shuffle(codigos.begin(), codigos.end(), rng);
+
+    std::vector<Estudiante> datos;
+
+    for (int i = 0; i < n; i++) {
+        datos.emplace_back(
+            codigos[i],
+            "Estudiante_" + std::to_string(i),
+            "Ingenieria",
+            distPPA(rng),
+            100,
+            EstadoAcademico::ACTIVO,
+            "2024-I"
+        );
+    }
+
+    return datos;
+}
+
+void benchmark(int n) {
+    using namespace una_puno;
+    using Clock = std::chrono::high_resolution_clock;
+
+    auto datos = generarDatos(n);
+    int buscarCod = datos[n / 2].codigo;
+
+    ArbolAcademico arbol;
+
+    auto t0 = Clock::now();
+
+    for (auto& e : datos) {
+        arbol.insertar(e);
+    }
+
+    auto t1 = Clock::now();
+    double msIns = std::chrono::duration<double, std::milli>(t1 - t0).count();
+
+    auto t2 = Clock::now();
+    arbol.buscar(buscarCod);
+    auto t3 = Clock::now();
+
+    double msBus = std::chrono::duration<double, std::milli>(t3 - t2).count();
+
+    std::cout << std::setw(8) << n
+              << " | ins: " << std::fixed << std::setprecision(3)
+              << std::setw(9) << msIns << " ms"
+              << " | bus: " << std::setw(8) << msBus << " ms"
+              << " | altura: " << arbol.altura() << '\n';
+}
+
+// ============================================================
+// PROGRAMA PRINCIPAL
+// ============================================================
+
+int main() {
+    using namespace una_puno;
+
+    std::cout << "=== BST Sistema Academico UNA-PUNO (C++17) ===\n";
+
+    ArbolAcademico arbol;
+
+    for (auto& estudiante : crearDatosPrueba()) {
+        arbol.insertar(estudiante);
+    }
+
+    arbol.imprimirArbol();
+
+    imprimirTabla(arbol.inOrder(), "IN-ORDER: ORDENADO POR CODIGO");
+
+    std::cout << "\nBFS nivel por nivel:\n";
+    for (const auto& e : arbol.bfs()) {
+        std::cout << e.codigo << " ";
+    }
+    std::cout << '\n';
+
+    std::cout << "\n-- Busqueda --\n";
+    auto encontrado = arbol.buscar(20210700);
+
+    if (encontrado) {
+        imprimirTabla({*encontrado}, "CODIGO 20210700");
+    }
+
+    auto noExiste = arbol.buscar(99999999);
+    std::cout << "Buscar 99999999: "
+              << (noExiste ? "encontrado" : "no encontrado") << '\n';
+
+    imprimirTabla(arbol.porRangoPPA(15.0f), "ESTUDIANTES CON PPA >= 15.0");
+    imprimirTabla(arbol.porEscuela("Ing. Sistemas"), "ESTUDIANTES DE ING. SISTEMAS");
+    imprimirTabla(arbol.porEstado(EstadoAcademico::ACTIVO), "ESTUDIANTES ACTIVOS");
+
+    std::cout << "\n-- Estadisticas --\n";
+    arbol.estadisticas();
+
+    std::cout << "\nEliminando codigo 20210300...\n";
+    arbol.eliminar(20210300);
+    imprimirTabla(arbol.inOrder(), "IN-ORDER DESPUES DE ELIMINAR 20210300");
+
+    auto mayor = arbol.maximo();
+    if (mayor) {
+        imprimirTabla({*mayor}, "ESTUDIANTE CON MAYOR CODIGO");
+    }
+
+    imprimirTabla(
+        arbol.buscarRangoCodigo(20210400, 20210700),
+        "BUSQUEDA POR RANGO DE CODIGO [20210400, 20210700]"
+    );
+
+    // Descomenta esto si quieres ejecutar el benchmark.
+    // OJO: 100000 puede tardar bastante en algunas computadoras.
+    //
+    // std::cout << "\nBENCHMARK\n";
+    // std::cout << "       N | Insercion | Busqueda | Altura\n";
+    // std::cout << std::string(60, '-') << '\n';
+    // for (int n : {100, 1000, 10000, 100000}) {
+    //     benchmark(n);
+    // }
+
+    return 0;
+}
